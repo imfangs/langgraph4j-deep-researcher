@@ -53,8 +53,12 @@ public class ReflectionNode implements NodeAction<ResearchState> {
             log.debug("Reflection user message length: {} characters", userMessage.length());
 
             // Call LLM for reflection analysis
-            String reflectionResult = chatModel.chat(userMessage);
-
+            // String reflectionResult = chatModel.chat(userMessage);
+            String reflectionResult = chatModel.chat(
+                SystemMessage.from(systemPrompt),
+                UserMessage.from(userMessage)
+            ).aiMessage().text();
+            
             log.info("Reflection analysis completed, result length: {} characters", reflectionResult.length());
             log.debug("Reflection result: {}", reflectionResult);
 
