@@ -49,8 +49,12 @@ public class FinalizerNode implements NodeAction<ResearchState> {
                 log.debug("Finalization user message length: {} characters", userMessage.length());
 
                 // Call LLM to generate final report
-                String finalSummary = chatModel.chat(userMessage);
-
+                // String finalSummary = chatModel.chat(userMessage);
+                String finalSummary = chatModel.chat(
+                    SystemMessage.from(systemPrompt),
+                    UserMessage.from(userMessage)
+                ).aiMessage().text();
+                
                 log.info("Final research report generation completed, length: {} characters", finalSummary.length());
 
                 // Calculate execution statistics
