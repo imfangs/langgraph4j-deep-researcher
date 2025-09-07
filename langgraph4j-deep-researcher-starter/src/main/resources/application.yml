@@ -1,15 +1,17 @@
 # Langgraph4j Deep Researcher Application Configuration
 server:
   port: 8080
-  servlet:
-    context-path: /
-  tomcat:
-    max-threads: 200
-    max-connections: 8192
+#  servlet:
+#    context-path: /
+#  tomcat:
+#    max-threads: 200
+#    max-connections: 8192
 
 spring:
   application:
     name: langgraph4j-deep-researcher
+  main:
+    web-application-type: reactive
   profiles:
     active: dev
   jackson:

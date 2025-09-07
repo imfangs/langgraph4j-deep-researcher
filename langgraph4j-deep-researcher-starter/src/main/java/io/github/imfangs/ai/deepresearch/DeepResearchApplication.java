@@ -12,11 +12,11 @@ import java.net.UnknownHostException;
 
 /**
  * Langgraph4j Deep Research Application main startup class
- * 
+ *
  * @author imfangs
  */
 @Slf4j
-@SpringBootApplication(scanBasePackages = "io.github.imfangs.ai.deepresearch")
+@SpringBootApplication(scanBasePackages = {"io.github.imfangs.ai.deepresearch", "org.bsc.langgraph4j.agui" })
 @EnableConfigurationProperties
 public class DeepResearchApplication {
 

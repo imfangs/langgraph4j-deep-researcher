@@ -109,6 +109,35 @@ curl http://localhost:8080/api/v1/research/search-engines
 curl http://localhost:8080/api/v1/research/health
 ```
 
+## AG-UI integration using CopilotKit
+
+### Build and Run Langgraph4j server
+
+# Build project
+
+```
+mvn clean package -DskipTests
+```
+# Run application
+
+```
+mvn spring-boot:run -pl langgraph4j-deep-researcher-starter
+```
+
+### Build and Run Copilotkit server
+
+```
+cd webui
+
+npm install
+
+npm run dev
+```
+
+open http://localhost:3000/
+
+![demo](agui1080.gif)
+
 ## Workflow
 
 Langgraph4j Deep Researcher uses the following workflow:

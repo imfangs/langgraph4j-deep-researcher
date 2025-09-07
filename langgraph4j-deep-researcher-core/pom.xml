@@ -42,6 +42,12 @@
             <artifactId>langgraph4j-agent-executor</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.bsc.langgraph4j</groupId>
+            <artifactId>langgraph4j-copilotkit</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+
         <!-- LangChain4j -->
         <dependency>
             <groupId>dev.langchain4j</groupId>
