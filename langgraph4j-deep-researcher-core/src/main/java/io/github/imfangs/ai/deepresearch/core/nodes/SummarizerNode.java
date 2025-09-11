@@ -54,8 +54,12 @@ public class SummarizerNode implements NodeAction<ResearchState> {
             log.debug("Summarization user message length: {} characters", userMessage.length());
 
             // Call LLM to generate summary
-            String newSummary = chatModel.chat(userMessage);
-
+            // String newSummary = chatModel.chat(userMessage);
+            String newSummary = chatModel.chat(
+                SystemMessage.from(systemPrompt),
+                UserMessage.from(userMessage)
+            ).aiMessage().text();
+            
             // Increment loop count
             Integer newLoopCount = state.researchLoopCount() + 1;
 
