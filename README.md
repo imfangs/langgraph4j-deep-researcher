@@ -4,6 +4,8 @@ A deep research assistant based on the Langgraph4j framework with iterative deep
 
 > 📖 **Language**: [English](README.md) | [中文](README_CN.md)
 
+![AG‑UI Demo](agui1080.gif)
+
 ## Project Overview
 
 Langgraph4j Deep Researcher is an intelligent research assistant that can:
@@ -109,34 +111,21 @@ curl http://localhost:8080/api/v1/research/search-engines
 curl http://localhost:8080/api/v1/research/health
 ```
 
-## AG-UI integration using CopilotKit
+## Web UI (AG-UI) with CopilotKit
 
-### Build and Run Langgraph4j server
-
-# Build project
-
-```
-mvn clean package -DskipTests
-```
-# Run application
-
-```
+- Ensure the Langgraph4j server is running:
+```bash
 mvn spring-boot:run -pl langgraph4j-deep-researcher-starter
 ```
 
-### Build and Run Copilotkit server
-
-```
+- Start the CopilotKit Web UI:
+```bash
 cd webui
-
 npm install
-
 npm run dev
 ```
 
-open http://localhost:3000/
-
-![demo](agui1080.gif)
+Open http://localhost:3000/
 
 ## Workflow
 

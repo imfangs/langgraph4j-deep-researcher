@@ -4,6 +4,8 @@
 
 > 📖 **语言**: [English](README.md) | [中文](README_CN.md)
 
+![AG‑UI 演示](agui1080.gif)
+
 ## 项目概述
 
 Langgraph4j Deep Researcher 是一个智能研究助手，能够：
@@ -108,6 +110,22 @@ curl http://localhost:8080/api/v1/research/search-engines
 ```bash
 curl http://localhost:8080/api/v1/research/health
 ```
+
+## Web UI（AG‑UI）基于 CopilotKit
+
+- 确保 Langgraph4j 服务已启动：
+```bash
+mvn spring-boot:run -pl langgraph4j-deep-researcher-starter
+```
+
+- 启动 CopilotKit Web UI：
+```bash
+cd webui
+npm install
+npm run dev
+```
+
+打开 http://localhost:3000/
 
 ## 工作流程
 
