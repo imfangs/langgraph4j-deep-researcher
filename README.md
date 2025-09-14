@@ -34,6 +34,31 @@ langgraph4j-deep-researcher/
 ├── langgraph4j-deep-researcher-core/         # Core business logic and services
 └── langgraph4j-deep-researcher-starter/      # Startup module and configuration files
 ```
+Building upon the existing single-graph architecture, the multigraphversion package provides a more complex and flexible multi-graph workflow implementation:
+
+```
+langgraph4j-deep-researcher-core/
+└── multigraphversion/
+    ├── mgraph/           # Graph Structure Layer
+    │   ├── MainGraph.java          # Main Coordination Graph
+    │   ├── SupervisorSubgraph.java # Supervisor Subgraph  
+    │   └── ResearcherSubgraph.java # Researcher Subgraph
+    ├── mnodes/           # Node Implementation Layer
+    │   ├── researchernode/         # Researcher Related Nodes
+    │   ├── SupervisorNode.java     # Supervisor Node
+    │   ├── CompressNode.java       # Content Compression Node
+    │   └── FinalReportGenerationNode.java # Final Report Generation Node
+    ├── mprompt/          # Prompt Template Layer
+    │   ├── PromptTemplateEN.java   # English Prompt Templates
+    │   ├── PromptTemplateCN.java   # Chinese Prompt Templates
+    │   └── PromptTemplateFactory.java # Multilingual Factory
+    ├── mservice/         # Service Layer
+    │   └── MainGraphService.java   # Main Graph Service
+    └── mstate/           # State Management Layer
+        ├── MainGraphState.java     # Main Graph State
+        ├── SupervisorState.java    # Supervisor State
+        └── ResearcherState.java    # Researcher State
+```
 
 ## Quick Start
 
@@ -99,6 +124,17 @@ curl -X POST http://localhost:8080/api/v1/research/execute \
   }'
 ```
 
+#### Execute Multi-Graph Deep Research
+
+```bash
+curl -X POST http://localhost:8080/api/v1/research/executemultigraph \
+  -H "Content-Type: application/json" \
+  -d '{
+    "research_topic": "Latest applications of artificial intelligence in healthcare",
+    "user_id": "tom"
+  }'
+```
+
 #### Get Available Search Engines
 
 ```bash
@@ -142,6 +178,73 @@ graph TD
     G --> C
     F -->|finalize<br/>Max loops reached| H[FinalizerNode<br/>✅ Final Organization]
     H --> I[Output Final Research Report]
+```
+
+LangGraph4J Deep Researcher's multi-graph architecture uses the following workflow:
+
+```mermaid
+graph TD
+
+    subgraph "ResearcherSubgraph"
+        direction BT
+        RS_END[END]
+        RS_C[compress]
+        RS_R[researcher]
+        RS_START[START]
+        
+        RS_START --> RS_R
+        RS_R --> RS_C
+        RS_C --> RS_END
+    end
+
+    subgraph "SupervisorSubgraph"
+        direction BT
+        SG_END[END]
+        SG_ST[supervisor_tools]
+        SG_S[supervisor]
+        SG_START[START]
+        
+        SG_START --> SG_S
+        SG_S -->|Finish| SG_END
+        SG_S --> SG_ST
+        SG_ST --> SG_S
+
+    end    
+
+    subgraph "MainGraph"
+        direction BT
+        MG_END[END]
+        MG_FRG[finalReportGeneration]
+        MG_SB[supervisorBridge]
+        MG_WRB[writeResearchBrief]
+        MG_START[START]
+        
+        MG_START --> MG_WRB
+        MG_WRB --> MG_SB
+        MG_SB --> MG_FRG
+        MG_FRG --> MG_END
+    end
+    
+    
+    MG_SB -.->|call| SG_START
+    SG_ST -.->|Concurrent execution<br/>most 3​| RS_START
+    
+
+    RS_R -.-> RS_TOOLS[AI tools<br/>🔍search/🤔think/✅complete]
+    
+
+    classDef mainGraph fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    classDef supervisorGraph fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+    classDef researcherGraph fill:#e8f5e8,stroke:#388e3c,stroke-width:3px
+    classDef startEnd fill:#fff8e1,stroke:#f57c00,stroke-width:2px
+    classDef tools fill:#fff3e0,stroke:#e65100,stroke-width:1px
+    
+    class MG_START,MG_END,SG_START,SG_END,RS_START,RS_END startEnd
+    class MG_WRB,MG_SB,MG_FRG mainGraph
+    class SG_S,SG_ST supervisorGraph
+    class RS_R,RS_C researcherGraph
+    class RS_TOOLS tools
+
 ```
 
 ## Configuration Guide

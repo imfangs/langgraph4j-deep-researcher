@@ -3,6 +3,7 @@ package io.github.imfangs.ai.deepresearch.core.controller;
 import io.github.imfangs.ai.deepresearch.api.dto.ApiResponse;
 import io.github.imfangs.ai.deepresearch.api.dto.ResearchRequest;
 import io.github.imfangs.ai.deepresearch.api.dto.ResearchResponse;
+import io.github.imfangs.ai.deepresearch.core.multigraphversion.mservice.MainGraphService;
 import io.github.imfangs.ai.deepresearch.core.service.DeepResearchService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +26,12 @@ import org.springframework.web.bind.annotation.*;
 public class DeepResearchController {
 
     private final DeepResearchService deepResearchService;
+    private final MainGraphService mainGraphService;
 
     @Autowired
-    public DeepResearchController(DeepResearchService deepResearchService) {
+    public DeepResearchController(DeepResearchService deepResearchService, MainGraphService mainGraphService) {
         this.deepResearchService = deepResearchService;
+        this.mainGraphService=mainGraphService;
     }
 
     /**
@@ -62,6 +65,33 @@ public class DeepResearchController {
                     .body(ApiResponse.error(500, "Internal system error: " + e.getMessage()));
         }
     }
+
+    @PostMapping("/executemultigraph")
+    public ResponseEntity<ApiResponse<ResearchResponse>> executeMultiGraph(
+            @Valid @RequestBody ResearchRequest request) {
+        
+        log.info("Received deep research request, topic: {}, user ID: {}", 
+                request.getResearchTopic(), request.getUserId());
+        
+        try {
+            ResearchResponse response = mainGraphService.executeResearch(request);
+            
+            if (response.getSuccess()) {
+                return ResponseEntity.ok(ApiResponse.success(response, "Research execution successful"));
+            } else {
+                return ResponseEntity.ok(ApiResponse.error(
+                        500, 
+                        response.getErrorMessage(), 
+                        response.getRequestId()));
+            }
+            
+        } catch (Exception e) {
+            log.error("Deep research execution exception", e);
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error(500, "Internal system error: " + e.getMessage()));
+        }
+    }
+
 
     /**
      * Health check endpoint

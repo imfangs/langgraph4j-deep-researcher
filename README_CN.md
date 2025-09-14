@@ -35,6 +35,31 @@ langgraph4j-deep-researcher/
 └── langgraph4j-deep-researcher-starter/      # 启动模块和配置文件
 ```
 
+```
+在现有的单图架构基础上，multigraphversion包提供了更复杂和灵活的多图工作流实现：
+langgraph4j-deep-researcher-core/
+└── multigraphversion/
+    ├── mgraph/           # 图结构层
+    │   ├── MainGraph.java          # 主协调图
+    │   ├── SupervisorSubgraph.java # 监督器子图  
+    │   └── ResearcherSubgraph.java # 研究员子图
+    ├── mnodes/           # 节点实现层
+    │   ├── researchernode/         # 研究员相关节点
+    │   ├── SupervisorNode.java     # 监督节点
+    │   ├── CompressNode.java       # 内容压缩节点
+    │   └── FinalReportGenerationNode.java # 报告生成节点
+    ├── mprompt/          # 提示模板层
+    │   ├── PromptTemplateEN.java   # 英文提示模板
+    │   ├── PromptTemplateCN.java   # 中文提示模板
+    │   └── PromptTemplateFactory.java # 多语言工厂
+    ├── mservice/         # 服务层
+    │   └── MainGraphService.java   # 主图服务
+    └── mstate/           # 状态管理层
+        ├── MainGraphState.java     # 主图状态
+        ├── SupervisorState.java    # 监督器状态
+        └── ResearcherState.java    # 研究员状态
+```
+
 ## 快速开始
 
 ### 1. 环境要求
@@ -99,6 +124,17 @@ curl -X POST http://localhost:8080/api/v1/research/execute \
   }'
 ```
 
+#### 执行多图版本的深度研究
+
+```bash
+curl -X POST http://localhost:8080/api/v1/research/executemultigraph \
+  -H "Content-Type: application/json" \
+  -d '{
+    "research_topic": "人工智能在医疗领域的最新应用",
+    "user_id": "tom"
+  }'
+```
+
 #### 获取可用搜索引擎
 
 ```bash
@@ -143,6 +179,74 @@ graph TD
     F -->|finalize<br/>达到最大循环| H[FinalizerNode<br/>✅ 最终整理]
     H --> I[输出最终研究报告]
 ```
+
+Langgraph4j Deep Researcher 多图架构使用以下工作流程：
+
+```mermaid
+graph TD
+
+    subgraph "ResearcherSubgraph"
+        direction BT
+        RS_END[END]
+        RS_C[compress]
+        RS_R[researcher]
+        RS_START[START]
+        
+        RS_START --> RS_R
+        RS_R --> RS_C
+        RS_C --> RS_END
+    end
+
+    subgraph "SupervisorSubgraph"
+        direction BT
+        SG_END[END]
+        SG_ST[supervisor_tools]
+        SG_S[supervisor]
+        SG_START[START]
+        
+        SG_START --> SG_S
+        SG_S -->|Finish| SG_END
+        SG_S --> SG_ST
+        SG_ST --> SG_S
+
+    end    
+
+    subgraph "MainGraph"
+        direction BT
+        MG_END[END]
+        MG_FRG[finalReportGeneration]
+        MG_SB[supervisorBridge]
+        MG_WRB[writeResearchBrief]
+        MG_START[START]
+        
+        MG_START --> MG_WRB
+        MG_WRB --> MG_SB
+        MG_SB --> MG_FRG
+        MG_FRG --> MG_END
+    end
+    
+    
+    MG_SB -.->|call| SG_START
+    SG_ST -.->|Concurrent execution<br/>most 3​| RS_START
+    
+
+    RS_R -.-> RS_TOOLS[AI tools<br/>🔍search/🤔think/✅complete]
+    
+
+    classDef mainGraph fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    classDef supervisorGraph fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+    classDef researcherGraph fill:#e8f5e8,stroke:#388e3c,stroke-width:3px
+    classDef startEnd fill:#fff8e1,stroke:#f57c00,stroke-width:2px
+    classDef tools fill:#fff3e0,stroke:#e65100,stroke-width:1px
+    
+    class MG_START,MG_END,SG_START,SG_END,RS_START,RS_END startEnd
+    class MG_WRB,MG_SB,MG_FRG mainGraph
+    class SG_S,SG_ST supervisorGraph
+    class RS_R,RS_C researcherGraph
+    class RS_TOOLS tools
+
+```
+
 
 ## 配置说明
 
