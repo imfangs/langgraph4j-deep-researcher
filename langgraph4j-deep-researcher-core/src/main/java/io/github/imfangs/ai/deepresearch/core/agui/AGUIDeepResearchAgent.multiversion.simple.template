@@ -1,0 +1,84 @@
+package io.github.imfangs.ai.deepresearch.core.agui;
+
+import static java.lang.String.format;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import org.bsc.langgraph4j.GraphStateException;
+import org.bsc.langgraph4j.NodeOutput;
+import org.bsc.langgraph4j.action.InterruptionMetadata;
+import org.bsc.langgraph4j.agui.AGUILangGraphAgent;
+import org.bsc.langgraph4j.agui.AGUIMessage;
+import org.bsc.langgraph4j.agui.AGUIType;
+import org.bsc.langgraph4j.state.AgentState;
+import org.springframework.stereotype.Component;
+import io.github.imfangs.ai.deepresearch.core.multigraphversion.mgraph.MainGraph;
+import io.github.imfangs.ai.deepresearch.core.multigraphversion.mstate.MainGraphState;
+
+@Component("AGUIAgent")
+public class AGUIDeepResearchAgent extends AGUILangGraphAgent {
+    
+    private final MainGraph mainGraph;
+
+    protected AGUIDeepResearchAgent(MainGraph mainGraph) {
+        this.mainGraph = mainGraph;
+    }
+
+    @Override
+    protected GraphData buildStateGraph() throws GraphStateException {
+        var researchGraph = mainGraph.createResearchGraph();
+        var compiledGraph = researchGraph.compile();
+        compiledGraph.setMaxIterations(50);
+        
+        return new GraphData(researchGraph.compile());
+    }
+
+    @Override
+    protected Map<String, Object> buildGraphInput(AGUIType.RunAgentInput runAgentInput) {
+        var researchTopic = runAgentInput.lastUserMessage()
+                .map(AGUIMessage.TextMessage::content)
+                .orElseThrow(() -> new IllegalStateException("last user message not found"));
+
+        var requestId = runAgentInput.threadId();
+        var userId = "agui-user";
+
+        return mainGraph.createInitialState(researchTopic, requestId, userId);
+    }
+
+    @Override
+    protected <State extends AgentState> List<Approval> onInterruption(AGUIType.RunAgentInput runAgentInput, InterruptionMetadata<State> interruptionMetadata) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected Optional<String> nodeOutputToText(NodeOutput<? extends AgentState> nodeOutput) {
+        if (nodeOutput.isSTART()) {
+            return Optional.empty();
+        }
+        
+        if (nodeOutput.isEND()) {
+            if (nodeOutput.state() instanceof MainGraphState state) {
+                return state.finalReport();
+            }
+            return Optional.empty();
+        }
+        
+        if (nodeOutput.state() instanceof MainGraphState state) {
+   
+            Optional<String> researchBrief = state.researchBrief();
+            if (researchBrief.isPresent() && !researchBrief.get().isEmpty()) {
+                return Optional.of(format("📋 **Research Brief Created**\n\n%s", researchBrief.get()));
+            }
+
+            Optional<String> finalReport = state.finalReport();
+            if (finalReport.isPresent() && !finalReport.get().isEmpty()) {
+                return Optional.of(format("📄 **Final Report Generated**\n\n%s", finalReport.get()));
+            }
+                    
+
+        }
+
+        return Optional.of("🔄 Research in progress...");
+    }
+    
+}
